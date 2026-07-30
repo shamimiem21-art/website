@@ -121,24 +121,37 @@ function bindEvent(id, event, handler) {
     if (el) el.addEventListener(event, handler);
 }
 
+function setText(id, text) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+}
+
 // ONE-CLICK DEMO USER & ADMIN LOGINS
 function performLogin() {
-    const emailInput = document.getElementById('login-email');
-    const inputVal = emailInput ? emailInput.value.trim() : '';
-    const email = inputVal || 'demo@habitflow.com';
-    const name = email.split('@')[0] || 'Shamim Hossen';
-    state.user = { id: 101, name: name, email: email, role: 'user' };
-    showToast('Welcome back, ' + name + '!', 'success');
-    enterApp();
+    try {
+        const emailInput = document.getElementById('login-email');
+        const inputVal = emailInput ? emailInput.value.trim() : '';
+        const email = inputVal || 'demo@habitflow.com';
+        const name = email.split('@')[0] || 'Shamim Hossen';
+        state.user = { id: 101, name: name, email: email, role: 'user' };
+        showToast('Welcome back, ' + name + '!', 'success');
+        enterApp();
+    } catch (e) {
+        console.error('Login error:', e);
+    }
 }
 
 function performAdminLogin() {
-    const emailInput = document.getElementById('admin-email');
-    const inputVal = emailInput ? emailInput.value.trim() : '';
-    const email = inputVal || 'admin@habitflow.com';
-    state.user = { id: 1, name: 'System Administrator', email: email, role: 'admin' };
-    showToast('Admin verification successful!', 'success');
-    enterApp();
+    try {
+        const emailInput = document.getElementById('admin-email');
+        const inputVal = emailInput ? emailInput.value.trim() : '';
+        const email = inputVal || 'admin@habitflow.com';
+        state.user = { id: 1, name: 'System Administrator', email: email, role: 'admin' };
+        showToast('Admin verification successful!', 'success');
+        enterApp();
+    } catch (e) {
+        console.error('Admin login error:', e);
+    }
 }
 
 function quickDemoLogin() { performLogin(); }
@@ -157,7 +170,11 @@ function switchAuthPane(paneName) {
 }
 
 function enterApp() {
+    if (!state.user) {
+        state.user = { id: 101, name: 'Shamim Hossen', email: 'demo@habitflow.com', role: 'user' };
+    }
     saveStateToLocalStorage();
+
     const authContainer = document.getElementById('auth-container');
     const appContainer = document.getElementById('app-container');
 
@@ -170,15 +187,18 @@ function enterApp() {
         appContainer.style.setProperty('display', 'flex', 'important');
     }
 
-    // Update Header & User Info
-    document.getElementById('user-name-lbl').textContent = state.user.name;
-    document.getElementById('user-role-lbl').textContent = state.user.role === 'admin' ? 'Administrator' : 'Explorer';
-    document.getElementById('user-avatar-lbl').textContent = state.user.name.charAt(0).toUpperCase();
+    // Safely update Header & User Info
+    const userName = state.user.name || 'Explorer';
+    const userRole = state.user.role || 'user';
+
+    setText('user-name-lbl', userName);
+    setText('user-role-lbl', userRole === 'admin' ? 'Administrator' : 'Explorer');
+    setText('user-avatar-lbl', userName.charAt(0).toUpperCase());
 
     // Show/Hide Admin Nav Item
     const adminNav = document.getElementById('nav-admin');
     if (adminNav) {
-        if (state.user.role === 'admin') adminNav.classList.remove('hidden');
+        if (userRole === 'admin') adminNav.classList.remove('hidden');
         else adminNav.classList.add('hidden');
     }
 
@@ -188,7 +208,11 @@ function enterApp() {
         window.location.hash = '#dashboard';
     }
 
-    handleRouting();
+    try {
+        handleRouting();
+    } catch (e) {
+        console.error('Routing error:', e);
+    }
 }
 
 function handleRouting() {
@@ -208,26 +232,31 @@ function handleRouting() {
     if (activeSec) activeSec.classList.remove('hidden');
 
     // Render section specifics
-    if (hash === 'dashboard') renderDashboard();
-    else if (hash === 'tracker') renderTracker();
-    else if (hash === 'stats') renderStats();
-    else if (hash === 'reports') renderReports();
-    else if (hash === 'calendar') renderCalendar();
-    else if (hash === 'profile') renderProfile();
-    else if (hash === 'admin' && state.user.role === 'admin') renderAdmin();
+    try {
+        if (hash === 'dashboard') renderDashboard();
+        else if (hash === 'tracker') renderTracker();
+        else if (hash === 'stats') renderStats();
+        else if (hash === 'reports') renderReports();
+        else if (hash === 'calendar') renderCalendar();
+        else if (hash === 'profile') renderProfile();
+        else if (hash === 'admin' && state.user && state.user.role === 'admin') renderAdmin();
+    } catch (e) {
+        console.error('Render error:', e);
+    }
 }
 
 // RENDER DASHBOARD
 function renderDashboard() {
-    document.getElementById('dashboard-greeting').textContent = `Hello, ${state.user.name.split(' ')[0]} 🌿`;
+    const firstName = (state.user && state.user.name) ? state.user.name.split(' ')[0] : 'Explorer';
+    setText('dashboard-greeting', `Hello, ${firstName} 🌿`);
     
     // Calculate Streak & Metrics
     const metrics = calculateMetrics();
-    document.getElementById('dashboard-score').textContent = metrics.score;
-    document.getElementById('stat-current-streak').textContent = `${metrics.currentStreak} days`;
-    document.getElementById('stat-longest-streak').textContent = `${metrics.longestStreak} days`;
-    document.getElementById('stat-weekly-pct').textContent = `${metrics.weeklyPct}%`;
-    document.getElementById('stat-monthly-pct').textContent = `${metrics.monthlyPct}%`;
+    setText('dashboard-score', metrics.score);
+    setText('stat-current-streak', `${metrics.currentStreak} days`);
+    setText('stat-longest-streak', `${metrics.longestStreak} days`);
+    setText('stat-weekly-pct', `${metrics.weeklyPct}%`);
+    setText('stat-monthly-pct', `${metrics.monthlyPct}%`);
 
     // Render Today's Habits Checklist
     renderDashboardTodayTasks();
