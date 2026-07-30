@@ -146,8 +146,17 @@ function switchAuthPane(paneName) {
 
 function enterApp() {
     saveStateToLocalStorage();
-    document.getElementById('auth-container').classList.add('hidden');
-    document.getElementById('app-container').classList.remove('hidden');
+    const authContainer = document.getElementById('auth-container');
+    const appContainer = document.getElementById('app-container');
+
+    if (authContainer) {
+        authContainer.classList.add('hidden');
+        authContainer.style.setProperty('display', 'none', 'important');
+    }
+    if (appContainer) {
+        appContainer.classList.remove('hidden');
+        appContainer.style.setProperty('display', 'flex', 'important');
+    }
 
     // Update Header & User Info
     document.getElementById('user-name-lbl').textContent = state.user.name;
@@ -800,8 +809,18 @@ document.addEventListener('DOMContentLoaded', () => {
     bindEvent('logout-btn', 'click', () => {
         state.user = null;
         saveStateToLocalStorage();
-        document.getElementById('app-container').classList.add('hidden');
-        document.getElementById('auth-container').classList.remove('hidden');
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app-container');
+
+        if (appContainer) {
+            appContainer.classList.add('hidden');
+            appContainer.style.setProperty('display', 'none', 'important');
+        }
+        if (authContainer) {
+            authContainer.classList.remove('hidden');
+            authContainer.style.setProperty('display', 'flex', 'important');
+        }
+
         switchAuthPane('login');
         showToast('Logged out', 'info');
     });
@@ -894,6 +913,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.user) {
         enterApp();
     } else {
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app-container');
+
+        if (appContainer) {
+            appContainer.classList.add('hidden');
+            appContainer.style.setProperty('display', 'none', 'important');
+        }
+        if (authContainer) {
+            authContainer.classList.remove('hidden');
+            authContainer.style.setProperty('display', 'flex', 'important');
+        }
+
         switchAuthPane('login');
     }
 });
