@@ -29,19 +29,26 @@ def ensure_tables_exist(conn):
         print(f"[Database Error] Table verification error: {e}")
 
 def get_db():
-    # If on Vercel and DB doesn't exist yet in /tmp, copy or initialize
-    if (os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV")) and not os.path.exists(DB_PATH):
-        if os.path.exists(DEFAULT_DB_PATH):
-            try:
-                shutil.copyfile(DEFAULT_DB_PATH, DB_PATH)
-            except Exception as e:
-                print(f"Error copying DB template: {e}")
-    
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON;")
-    ensure_tables_exist(conn)
-    return conn
+    try:
+        # If on Vercel and DB doesn't exist yet in /tmp, copy template if available
+        if (os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV")) and not os.path.exists(DB_PATH):
+            if os.path.exists(DEFAULT_DB_PATH):
+                try:
+                    shutil.copyfile(DEFAULT_DB_PATH, DB_PATH)
+                except Exception as e:
+                    print(f"Error copying DB template: {e}")
+        
+        conn = sqlite3.connect(DB_PATH)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA foreign_keys = ON;")
+        ensure_tables_exist(conn)
+        return conn
+    except Exception as e:
+        print(f"[DB Connect Warning] Falling back to in-memory DB: {e}")
+        conn = sqlite3.connect(":memory:", check_same_thread=False)
+        conn.row_factory = sqlite3.Row
+        ensure_tables_exist(conn)
+        return conn
 
 def init_db_schema_and_seed(conn):
     cursor = conn.cursor()

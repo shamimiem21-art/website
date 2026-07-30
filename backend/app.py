@@ -23,6 +23,13 @@ app.register_blueprint(tasks_bp, url_prefix="/api/tasks")
 app.register_blueprint(reports_bp, url_prefix="/api/reports")
 app.register_blueprint(admin_bp, url_prefix="/api/admin")
 
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    return response
+
 # Initialize Database on boot
 with app.app_context():
     try:
