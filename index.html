@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HabitFlow - Nature-Inspired Habit & Daily Task Tracker</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- AUTHENTICATION CONTAINER -->
+    <div id="auth-container" class="auth-wrapper">
+        <div class="auth-card glass-card">
+            <div class="auth-header">
+                <div class="brand-logo">
+                    <i class="fas fa-leaf"></i>
+                    <h2>HabitFlow</h2>
+                </div>
+                <p id="auth-subtitle" class="auth-subtitle">Welcome back. Keep flowing.</p>
+            </div>
+
+            <!-- USER LOGIN PANE -->
+            <div id="auth-login-pane" class="auth-pane">
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-email">Email Address</label>
+                        <input type="email" id="login-email" class="form-control" placeholder="demo@habitflow.com" required>
+                    </div>
+                    <div class="form-group">
+                        <div class="label-row">
+                            <label for="login-password">Password</label>
+                            <a href="#" id="goto-forgot-pw" class="form-link">Forgot Password?</a>
+                        </div>
+                        <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Log In</button>
+                    <button type="button" class="btn btn-secondary btn-block" style="margin-top: 10px; background: rgba(76, 175, 80, 0.15); border: 1px solid var(--primary); color: var(--text);" onclick="quickDemoLogin()"><i class="fas fa-bolt"></i> One-Click Demo User Login</button>
+                </form>
+                <div class="auth-footer">
+                    <span>New here? <a href="#" id="goto-register" class="form-link">Create an account</a></span>
+                    <div class="admin-login-divider">
+                        <span>or</span>
+                    </div>
+                    <a href="#" id="goto-admin-login" class="form-link text-center block"><i class="fas fa-shield-alt"></i> Access Admin Terminal</a>
+                </div>
+            </div>
+
+            <!-- REGISTER PANE -->
+            <div id="auth-register-pane" class="auth-pane hidden">
+                <form id="register-form">
+                    <div class="form-group">
+                        <label for="reg-name">Full Name</label>
+                        <input type="text" id="reg-name" class="form-control" placeholder="Shamim Hossen" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email">Email Address</label>
+                        <input type="email" id="reg-email" class="form-control" placeholder="name@domain.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-password">Password (min 6 characters)</label>
+                        <input type="password" id="reg-password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+                </form>
+                <div class="auth-footer">
+                    <span>Already have an account? <a href="#" id="goto-login" class="form-link">Log in</a></span>
+                </div>
+            </div>
+
+            <!-- FORGOT PASSWORD PANE -->
+            <div id="auth-forgot-pane" class="auth-pane hidden">
+                <p class="verify-helper">Enter your email and set your new password:</p>
+                <form id="forgot-form">
+                    <div class="form-group">
+                        <label for="forgot-email">Email Address</label>
+                        <input type="email" id="forgot-email" class="form-control" placeholder="name@domain.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="forgot-new-pw">New Password</label>
+                        <input type="password" id="forgot-new-pw" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Reset Password</button>
+                </form>
+                <div class="auth-footer">
+                    <a href="#" id="forgot-cancel" class="form-link">Back to Login</a>
+                </div>
+            </div>
+
+            <!-- ADMIN LOGIN PANE -->
+            <div id="auth-admin-pane" class="auth-pane hidden">
+                <div class="admin-badge"><i class="fas fa-shield-alt"></i> Admin Terminal</div>
+                <form id="admin-login-form">
+                    <div class="form-group">
+                        <label for="admin-email">Admin Email</label>
+                        <input type="email" id="admin-email" class="form-control" placeholder="admin@habitflow.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-password">Admin Password</label>
+                        <input type="password" id="admin-password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Verify Security Access</button>
+                    <button type="button" class="btn btn-secondary btn-block" style="margin-top: 10px; background: rgba(76, 175, 80, 0.15); border: 1px solid var(--primary); color: var(--text);" onclick="quickAdminLogin()"><i class="fas fa-bolt"></i> One-Click Admin Login</button>
+                </form>
+                <div class="auth-footer">
+                    <a href="#" id="goto-user-login" class="form-link">Return to User Portal</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="app-container" class="app-wrapper hidden">
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <i class="fas fa-leaf"></i>
+                    <span class="logo-text">HabitFlow</span>
+                </div>
+                <button id="mobile-close-nav" class="mobile-nav-btn"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#dashboard" class="nav-item active" data-view="dashboard">
+                    <i class="fas fa-th-large"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#tracker" class="nav-item" data-view="tracker">
+                    <i class="fas fa-check-square"></i>
+                    <span>Task Tracker</span>
+                </a>
+                <a href="#stats" class="nav-item" data-view="stats">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Statistics</span>
+                </a>
+                <a href="#reports" class="nav-item" data-view="reports">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Analytical Reports</span>
+                </a>
+                <a href="#calendar" class="nav-item" data-view="calendar">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Calendar</span>
+                </a>
+                <a href="#profile" class="nav-item" data-view="profile">
+                    <i class="fas fa-user"></i>
+                    <span>My Profile</span>
+                </a>
+                <a href="#admin" id="nav-admin" class="nav-item hidden" data-view="admin">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Admin Panel</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-preview">
+                    <div class="avatar" id="user-avatar-lbl">U</div>
+                    <div class="user-info">
+                        <span class="user-name" id="user-name-lbl">User</span>
+                        <span class="user-role" id="user-role-lbl">Explorer</span>
+                    </div>
+                </div>
+                <div class="sidebar-actions">
+                    <button id="theme-toggle-btn" class="btn-icon" title="Toggle Theme"><i class="fas fa-moon"></i></button>
+                    <button id="logout-btn" class="btn-icon text-danger" title="Log Out"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+            <header class="main-header">
+                <button id="mobile-open-nav" class="mobile-nav-btn"><i class="fas fa-bars"></i></button>
+                <div class="header-search">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="global-search" placeholder="Search habits & tasks...">
+                </div>
+                <div class="header-actions">
+                    <span id="header-date">Monday, July 13, 2026</span>
+                </div>
+            </header>
+
+            <div class="content-body">
+                <!-- DASHBOARD VIEW -->
+                <section id="dashboard-view" class="view-section">
+                    <div class="welcome-banner">
+                        <div class="welcome-text">
+                            <h1 id="dashboard-greeting">Hello, Explorer 🌿</h1>
+                            <p>Here is your growth journey for today. Every step counts.</p>
+                        </div>
+                        <div class="welcome-score">
+                            <span class="score-num" id="dashboard-score">0</span>
+                            <span class="score-lbl">Productivity Score</span>
+                        </div>
+                    </div>
+
+                    <!-- METRICS GRID -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-icon streak"><i class="fas fa-fire"></i></div>
+                            <div class="metric-details">
+                                <span class="metric-value" id="stat-current-streak">0 days</span>
+                                <span class="metric-label">Current Streak</span>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon longest-streak"><i class="fas fa-trophy"></i></div>
+                            <div class="metric-details">
+                                <span class="metric-value" id="stat-longest-streak">0 days</span>
+                                <span class="metric-label">Longest Streak</span>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon weekly"><i class="fas fa-calendar-week"></i></div>
+                            <div class="metric-details">
+                                <span class="metric-value" id="stat-weekly-pct">0%</span>
+                                <span class="metric-label">Weekly Progress</span>
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-icon monthly"><i class="fas fa-calendar-alt"></i></div>
+                            <div class="metric-details">
+                                <span class="metric-value" id="stat-monthly-pct">0%</span>
+                                <span class="metric-label">Monthly Progress</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TODAY'S TASKS & HABITS CHECKLIST -->
+                    <div class="glass-card today-tasks-card" style="margin-bottom: 24px;">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                            <h3><i class="fas fa-tasks"></i> Today's Habits & Tasks Checklist</h3>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-primary btn-sm" onclick="openTaskModal()"><i class="fas fa-plus"></i> Add Habit</button>
+                                <a href="#tracker" class="btn btn-secondary btn-sm" onclick="window.location.hash='#tracker'; handleRouting();"><i class="fas fa-external-link-alt"></i> Full Tracker</a>
+                            </div>
+                        </div>
+                        <div class="card-body" style="padding-top: 10px;">
+                            <div id="dashboard-tasks-container">
+                                <!-- Populated dynamically via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HEATMAP AND BADGES GRID -->
+                    <div class="dashboard-grid">
+                        <div class="glass-card heatmap-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-th"></i> Calendar Heatmap (Last 365 Days)</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="heatmap-container" id="heatmap-grid">
+                                    <!-- Populated dynamically via JS -->
+                                </div>
+                                <div class="heatmap-legend">
+                                    <span>Less</span>
+                                    <div class="legend-box level-0"></div>
+                                    <div class="legend-box level-1"></div>
+                                    <div class="legend-box level-2"></div>
+                                    <div class="legend-box level-3"></div>
+                                    <div class="legend-box level-4"></div>
+                                    <span>More</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="glass-card badges-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-award"></i> My Badges</h3>
+                            </div>
+                            <div class="card-body" id="badges-container">
+                                <!-- Badges dynamic -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ANNOUNCEMENTS -->
+                    <div class="dashboard-announcements glass-card">
+                        <div class="card-header">
+                            <h3><i class="fas fa-bullhorn"></i> Announcements</h3>
+                        </div>
+                        <div class="card-body" id="dashboard-announcements-list">
+                            <!-- Announcements list dynamic -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TASK TRACKER VIEW -->
+                <section id="tracker-view" class="view-section hidden">
+                    <div class="tracker-header">
+                        <h2>Daily Task Tracker</h2>
+                        <div class="tracker-controls">
+                            <select id="filter-category">
+                                <option value="">All Categories</option>
+                            </select>
+                            <select id="filter-priority">
+                                <option value="">All Priorities</option>
+                                <option value="high">High Priority</option>
+                                <option value="medium">Medium Priority</option>
+                                <option value="low">Low Priority</option>
+                            </select>
+                            <button id="toggle-archived-btn" class="btn btn-secondary btn-sm"><i class="fas fa-archive"></i> Show Archived</button>
+                            <button id="open-add-task-btn" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Add New Task</button>
+                        </div>
+                    </div>
+
+                    <div class="glass-card table-card">
+                        <div class="table-responsive">
+                            <table class="tracker-table" id="tracker-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 40px;"></th>
+                                        <th>Habit / Task</th>
+                                        <th>Category</th>
+                                        <th>Sun</th>
+                                        <th>Mon</th>
+                                        <th>Tue</th>
+                                        <th>Wed</th>
+                                        <th>Thu</th>
+                                        <th>Fri</th>
+                                        <th>Sat</th>
+                                        <th>Weekly Progress</th>
+                                        <th style="width: 80px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tracker-tbody">
+                                    <!-- Dynamic rows via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- STATISTICS VIEW -->
+                <section id="stats-view" class="view-section hidden">
+                    <h2>Statistics & Analytics</h2>
+                    <div class="stats-grid">
+                        <div class="glass-card chart-card">
+                            <h3><i class="fas fa-chart-line"></i> Daily Completion Rate</h3>
+                            <div class="chart-container"><canvas id="chart-daily"></canvas></div>
+                        </div>
+                        <div class="glass-card chart-card">
+                            <h3><i class="fas fa-chart-pie"></i> Category Distribution</h3>
+                            <div class="chart-container"><canvas id="chart-category"></canvas></div>
+                        </div>
+                        <div class="glass-card chart-card full-width">
+                            <h3><i class="fas fa-chart-bar"></i> Weekly Trend Analysis</h3>
+                            <div class="chart-container"><canvas id="chart-weekly-trend"></canvas></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ANALYTICAL REPORTS VIEW -->
+                <section id="reports-view" class="view-section hidden">
+                    <div class="reports-header-row">
+                        <div>
+                            <h2>Analytical Reports</h2>
+                            <p class="text-muted">In-depth weekly & monthly habit performance insights.</p>
+                        </div>
+                        <div class="reports-actions">
+                            <div class="btn-group">
+                                <button id="report-type-weekly-btn" class="btn btn-secondary active">Weekly Report</button>
+                                <button id="report-type-monthly-btn" class="btn btn-secondary">Monthly Report</button>
+                            </div>
+                            <div class="btn-group">
+                                <button id="report-prev-btn" class="btn btn-secondary"><i class="fas fa-chevron-left"></i> Previous</button>
+                                <button id="report-next-btn" class="btn btn-secondary">Next <i class="fas fa-chevron-right"></i></button>
+                            </div>
+                            <button id="print-report-btn" class="btn btn-primary"><i class="fas fa-print"></i> Print Report</button>
+                            <button id="download-chart-btn" class="btn btn-secondary"><i class="fas fa-download"></i> Download Chart</button>
+                        </div>
+                    </div>
+
+                    <div id="reports-content-container">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </section>
+
+                <!-- CALENDAR VIEW -->
+                <section id="calendar-view" class="view-section hidden">
+                    <div class="calendar-header-row">
+                        <h2 id="calendar-month-title">July 2026</h2>
+                        <div class="btn-group">
+                            <button id="cal-prev-month" class="btn btn-secondary"><i class="fas fa-chevron-left"></i> Previous</button>
+                            <button id="cal-next-month" class="btn btn-secondary">Next <i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    <div class="glass-card calendar-card">
+                        <div class="calendar-grid-header">
+                            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                        </div>
+                        <div class="calendar-grid-body" id="calendar-days-grid">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- MY PROFILE VIEW -->
+                <section id="profile-view" class="view-section hidden">
+                    <h2>My Account & Settings</h2>
+                    <div class="profile-grid">
+                        <div class="glass-card profile-info-card">
+                            <div class="profile-avatar-large" id="profile-avatar-lbl">U</div>
+                            <h3 id="profile-name-lbl">User Name</h3>
+                            <p id="profile-email-lbl" class="text-muted">user@domain.com</p>
+
+                            <form id="profile-info-form" style="margin-top: 20px;">
+                                <div class="form-group">
+                                    <label>Display Name</label>
+                                    <input type="text" id="profile-name-input" class="form-control" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-sm">Update Profile</button>
+                            </form>
+                        </div>
+
+                        <div class="glass-card settings-card">
+                            <h3><i class="fas fa-cog"></i> Application Settings</h3>
+                            <div class="setting-item">
+                                <div>
+                                    <strong>Weekly Email Reports</strong>
+                                    <p class="text-muted">Receive weekly performance summaries</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="sett-weekly-emails" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <div>
+                                    <strong>Browser Notifications</strong>
+                                    <p class="text-muted">Enable scheduled habit reminders</p>
+                                </div>
+                                <label class="switch">
+                                    <input type="checkbox" id="sett-notifications" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <h4 style="margin-top: 24px;">Scheduled Reminders</h4>
+                            <div id="reminder-list-container" style="margin-bottom: 12px;"></div>
+                            
+                            <form id="add-reminder-form" style="display: flex; gap: 8px;">
+                                <select id="reminder-task-select" class="form-control" style="flex: 2;" required>
+                                    <option value="">Select Task...</option>
+                                </select>
+                                <input type="time" id="reminder-time-input" class="form-control" style="flex: 1;" required>
+                                <button type="submit" class="btn btn-primary btn-sm">Add Reminder</button>
+                            </form>
+
+                            <h4 style="margin-top: 28px;">Change Password</h4>
+                            <form id="change-password-form">
+                                <div class="form-group">
+                                    <input type="password" id="pw-old" class="form-control" placeholder="Current Password" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" id="pw-new" class="form-control" placeholder="New Password" required>
+                                </div>
+                                <button type="submit" class="btn btn-secondary btn-sm">Change Password</button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ADMIN PANEL VIEW -->
+                <section id="admin-view" class="view-section hidden">
+                    <div class="admin-header-row">
+                        <h2><i class="fas fa-shield-alt"></i> Administrative Control Terminal</h2>
+                        <span class="tag tag-admin">System Admin Access</span>
+                    </div>
+
+                    <div class="admin-nav-tabs">
+                        <button class="admin-tab-btn active" data-tab="admin-pane-users">Users Management</button>
+                        <button class="admin-tab-btn" data-tab="admin-pane-cats">Categories Manager</button>
+                        <button class="admin-tab-btn" data-tab="admin-pane-announcements">Announcements</button>
+                        <button class="admin-tab-btn" data-tab="admin-pane-flags">Feature Flags</button>
+                        <button class="admin-tab-btn" data-tab="admin-pane-logs">System Logs</button>
+                    </div>
+
+                    <!-- USERS TAB -->
+                    <div id="admin-pane-users" class="admin-pane">
+                        <div class="glass-card">
+                            <div class="table-responsive">
+                                <table class="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Name</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="admin-users-tbody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CATEGORIES TAB -->
+                    <div id="admin-pane-cats" class="admin-pane hidden">
+                        <div class="glass-card" style="margin-bottom: 20px;">
+                            <h3>Add New Category</h3>
+                            <form id="admin-add-cat-form" style="display: flex; gap: 12px; margin-top: 12px;">
+                                <input type="text" id="admin-cat-name" class="form-control" placeholder="Category Name" required>
+                                <input type="color" id="admin-cat-color" value="#2d5a27" style="height: 38px; cursor: pointer;">
+                                <button type="submit" class="btn btn-primary">Add Category</button>
+                            </form>
+                        </div>
+                        <div class="glass-card">
+                            <ul id="admin-cats-list" class="admin-list"></ul>
+                        </div>
+                    </div>
+
+                    <!-- ANNOUNCEMENTS TAB -->
+                    <div id="admin-pane-announcements" class="admin-pane hidden">
+                        <div class="glass-card">
+                            <h3>Push Broadcast Announcement</h3>
+                            <form id="admin-announce-form" style="margin-top: 12px;">
+                                <div class="form-group">
+                                    <input type="text" id="announce-title" class="form-control" placeholder="Announcement Title" required>
+                                </div>
+                                <div class="form-group">
+                                    <textarea id="announce-content" class="form-control" rows="3" placeholder="Message content..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Push Announcement</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- FEATURE FLAGS TAB -->
+                    <div id="admin-pane-flags" class="admin-pane hidden">
+                        <div class="glass-card">
+                            <h3>Expandable Modules (Feature Flags)</h3>
+                            <p class="text-muted">Enable or disable future expansion modules across the platform.</p>
+                            <div id="admin-flags-container" style="margin-top: 16px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- SYSTEM LOGS TAB -->
+                    <div id="admin-pane-logs" class="admin-pane hidden">
+                        <div class="glass-card">
+                            <h3>System Event Logs</h3>
+                            <ul id="admin-logs-list" class="admin-logs-list"></ul>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- TASK DIALOG MODAL -->
+    <div id="task-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="task-modal-title">Add New Habit / Task</h3>
+                <button id="task-modal-close" class="btn-icon"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="task-form">
+                <input type="hidden" id="task-id">
+                <div class="form-group">
+                    <label>Habit Name</label>
+                    <input type="text" id="task-name" class="form-control" placeholder="e.g. Drink 2L Water" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" id="task-desc" class="form-control" placeholder="Short description or goal">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="task-category" class="form-control" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select id="task-priority" class="form-control">
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                            <option value="low">Low</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Icon (FontAwesome)</label>
+                        <input type="text" id="task-icon" class="form-control" value="check">
+                    </div>
+                    <div class="form-group">
+                        <label>Color</label>
+                        <input type="color" id="task-color" class="form-control" value="#4caf50" style="height: 38px; cursor: pointer;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Recurrence</label>
+                    <select id="task-recurrence" class="form-control">
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly Custom Days</option>
+                    </select>
+                </div>
+                <div class="form-group hidden" id="recurrence-days-group">
+                    <label>Active Days</label>
+                    <div class="day-checkboxes">
+                        <label><input type="checkbox" name="rec-day" value="Mon" checked> Mon</label>
+                        <label><input type="checkbox" name="rec-day" value="Tue" checked> Tue</label>
+                        <label><input type="checkbox" name="rec-day" value="Wed" checked> Wed</label>
+                        <label><input type="checkbox" name="rec-day" value="Thu" checked> Thu</label>
+                        <label><input type="checkbox" name="rec-day" value="Fri" checked> Fri</label>
+                        <label><input type="checkbox" name="rec-day" value="Sat" checked> Sat</label>
+                        <label><input type="checkbox" name="rec-day" value="Sun" checked> Sun</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="task-modal-cancel" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Habit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CALENDAR DAY DETAIL MODAL -->
+    <div id="calendar-day-modal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="cal-day-modal-date">Date Details</h3>
+                <button id="calendar-day-modal-close" class="btn-icon"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="cal-day-modal-body">
+                <!-- Day details dynamic -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="cal-day-modal-close-btn" class="btn btn-primary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core App Logic -->
+    <script src="js/app.js"></script>
+</body>
+</html>
