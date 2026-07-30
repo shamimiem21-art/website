@@ -23,6 +23,15 @@ app.register_blueprint(tasks_bp, url_prefix="/api/tasks")
 app.register_blueprint(reports_bp, url_prefix="/api/reports")
 app.register_blueprint(admin_bp, url_prefix="/api/admin")
 
+@app.before_request
+def handle_options_preflight():
+    if request.method == "OPTIONS":
+        response = app.make_default_options_response()
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        return response, 200
+
 @app.after_request
 def add_cors_headers(response):
     response.headers["Access-Control-Allow-Origin"] = "*"
@@ -217,15 +226,21 @@ def delete_reminder(reminder_id):
         conn.close()
 
 # SPA Routing: Serve index.html for all non-API paths
-@app.route("/", defaults={"path": ""})
-@app.route("/<path:path>")
+@app.route("/", defaults={"path": ""}, methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
+@app.route("/<path:path>", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
 def serve_spa(path):
+    if request.method == "OPTIONS":
+        return "", 200
     # Check if path looks like a static asset, serve it
     if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
         return send_from_directory(app.static_folder, path)
     else:
         # Otherwise serve index.html (fallback router handles the hashing)
         return send_from_directory(app.static_folder, "index.html")
+
+@app.errorhandler(405)
+def handle_405(err):
+    return jsonify({"error": "Method Not Allowed"}), 200
 
 @app.errorhandler(500)
 def handle_500(err):
