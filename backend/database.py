@@ -2,12 +2,33 @@ import sqlite3
 import os
 from werkzeug.security import generate_password_hash
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "habitflow.db")
+import shutil
+
+# Vercel Serverless read-only filesystem handling
+DEFAULT_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "habitflow.db")
+
+if os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"):
+    DB_PATH = "/tmp/habitflow.db"
+    # Copy pre-seeded database template to /tmp if not present
+    if not os.path.exists(DB_PATH) and os.path.exists(DEFAULT_DB_PATH):
+        try:
+            shutil.copyfile(DEFAULT_DB_PATH, DB_PATH)
+        except Exception as e:
+            print(f"Error copying DB to /tmp: {e}")
+else:
+    DB_PATH = DEFAULT_DB_PATH
 
 def get_db():
+    # If on Vercel and DB doesn't exist yet in /tmp, copy or initialize
+    if (os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV")) and not os.path.exists(DB_PATH):
+        if os.path.exists(DEFAULT_DB_PATH):
+            try:
+                shutil.copyfile(DEFAULT_DB_PATH, DB_PATH)
+            except Exception as e:
+                print(f"Error copying DB template: {e}")
+    
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    # Enable foreign keys
     conn.execute("PRAGMA foreign_keys = ON;")
     return conn
 
