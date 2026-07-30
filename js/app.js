@@ -161,11 +161,22 @@ function enterApp() {
         else adminNav.classList.add('hidden');
     }
 
+    const currentHash = window.location.hash.replace('#', '');
+    const validViews = ['dashboard', 'tracker', 'stats', 'reports', 'calendar', 'profile', 'admin'];
+    if (!validViews.includes(currentHash)) {
+        window.location.hash = '#dashboard';
+    }
+
     handleRouting();
 }
 
 function handleRouting() {
-    const hash = window.location.hash.replace('#', '') || 'dashboard';
+    let hash = window.location.hash.replace('#', '');
+    const validViews = ['dashboard', 'tracker', 'stats', 'reports', 'calendar', 'profile', 'admin'];
+    if (!validViews.includes(hash)) {
+        hash = 'dashboard';
+    }
+
     document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden'));
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
