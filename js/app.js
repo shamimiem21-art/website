@@ -214,6 +214,12 @@ function calculateMetrics() {
     let tempStreak = 0;
     const activeTasks = state.tasks.filter(t => t.is_active && !t.is_archived);
 
+    // Count total completions across all time
+    let totalCompletedCount = 0;
+    Object.values(state.completions).forEach(val => {
+        if (val === 1) totalCompletedCount++;
+    });
+
     // Calculate streak from past 60 days
     for (let i = 0; i < 60; i++) {
         const d = new Date(today);
@@ -225,7 +231,7 @@ function calculateMetrics() {
             if (state.completions[`${t.id}_${dateStr}`] === 1) completedTodayCount++;
         });
 
-        if (activeTasks.length > 0 && completedTodayCount >= Math.ceil(activeTasks.length / 2)) {
+        if (activeTasks.length > 0 && completedTodayCount > 0) {
             tempStreak++;
             if (i === 0 || tempStreak === i + 1) currentStreak = tempStreak;
             if (tempStreak > longestStreak) longestStreak = tempStreak;
@@ -260,9 +266,10 @@ function calculateMetrics() {
     }
     const monthlyPct = totalMonthlyPossible > 0 ? Math.round((monthlyCompleted / totalMonthlyPossible) * 100) : 0;
 
-    const score = Math.round((currentStreak * 10) + (weeklyPct * 5));
+    // Productivity Score starts at ZERO and grows as user completes tasks
+    const score = totalCompletedCount === 0 ? 0 : Math.round((currentStreak * 10) + (weeklyPct * 5) + (totalCompletedCount * 2));
 
-    return { score, currentStreak, longestStreak, weeklyPct, monthlyPct };
+    return { score, currentStreak, longestStreak, weeklyPct, monthlyPct, totalCompletedCount };
 }
 
 function renderDashboardTodayTasks() {
@@ -333,17 +340,17 @@ function renderBadges(metrics) {
     if (!container) return;
 
     const badges = [
-        { name: 'Seedling', icon: 'seedling', unlocked: true, desc: 'Started journey' },
+        { name: 'Seedling', icon: 'seedling', unlocked: metrics.totalCompletedCount > 0, desc: 'Completed 1st habit' },
         { name: '7-Day Streak', icon: 'fire', unlocked: metrics.currentStreak >= 7, desc: '7 days consistent' },
         { name: 'Master Flow', icon: 'trophy', unlocked: metrics.longestStreak >= 14, desc: '14+ days streak' },
-        { name: 'Early Bird', icon: 'sun', unlocked: true, desc: 'Completed morning tasks' }
+        { name: 'Consistency Hero', icon: 'star', unlocked: metrics.weeklyPct >= 80, desc: '80%+ weekly progress' }
     ];
 
     container.innerHTML = badges.map(b => `
         <div class="badge-item" style="opacity: ${b.unlocked ? 1 : 0.4};">
-            <div class="badge-icon"><i class="fas fa-${b.icon}"></i></div>
+            <div class="badge-icon" style="background: ${b.unlocked ? 'var(--primary-light)' : 'rgba(0,0,0,0.05)'}; color: ${b.unlocked ? 'var(--primary)' : 'var(--text-light)'};"><i class="fas fa-${b.icon}"></i></div>
             <div>
-                <strong>${b.name}</strong>
+                <strong>${b.name} ${b.unlocked ? '✓' : '🔒'}</strong>
                 <p style="font-size: 11px; color: var(--text-muted);">${b.desc}</p>
             </div>
         </div>
@@ -511,6 +518,9 @@ function renderReports() {
     const container = document.getElementById('reports-content-container');
     if (!container) return;
 
+    const metrics = calculateMetrics();
+    const ratePct = state.reportType === 'weekly' ? metrics.weeklyPct : metrics.monthlyPct;
+
     container.innerHTML = `
         <div class="glass-card" style="margin-bottom: 20px;">
             <h3>📊 Executive Performance Report (${state.reportType.toUpperCase()})</h3>
@@ -519,32 +529,35 @@ function renderReports() {
             <div class="metrics-grid" style="margin-top: 20px;">
                 <div class="metric-card">
                     <div class="metric-details">
-                        <span class="metric-value">86.4%</span>
+                        <span class="metric-value">${ratePct}%</span>
                         <span class="metric-label">Average Consistency Rate</span>
                     </div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-details">
-                        <span class="metric-value">42</span>
+                        <span class="metric-value">${metrics.totalCompletedCount}</span>
                         <span class="metric-label">Total Completed Tasks</span>
                     </div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-details">
-                        <span class="metric-value">Health & Fitness</span>
+                        <span class="metric-value">${metrics.totalCompletedCount > 0 ? 'Active Habits' : 'No Data Yet'}</span>
                         <span class="metric-label">Top Performing Category</span>
                     </div>
                 </div>
             </div>
 
-            <h4 style="margin-top: 24px;">💡 AI Growth & Improvement Suggestions</h4>
+            <h4 style="margin-top: 24px;">💡 Growth & Improvement Suggestions</h4>
             <ul style="margin-top: 10px; padding-left: 20px; color: var(--text-muted); line-height: 1.6;">
-                <li>Your consistency in <strong>Morning Meditation</strong> is outstanding (95% completion rate). Keep it up!</li>
-                <li>Consider moving <strong>Deep Work Sessions</strong> to earlier in the morning for peak cognitive output.</li>
-                <li>Weekend completion rates drop slightly by 10%. Setting weekend-specific light targets will maintain your streak.</li>
+                ${metrics.totalCompletedCount === 0 ? 
+                    '<li>You have not checked off any habits yet! Check off your first habit on the dashboard or tracker to begin building your streak! 🌿</li>' : 
+                    `<li>You have completed <strong>${metrics.totalCompletedCount}</strong> habit task(s) so far. Outstanding momentum!</li>
+                     <li>Your current streak is <strong>${metrics.currentStreak} day(s)</strong> and longest streak is <strong>${metrics.longestStreak} day(s)</strong>.</li>`
+                }
             </ul>
         </div>
     `;
+}
 }
 
 // RENDER CALENDAR
