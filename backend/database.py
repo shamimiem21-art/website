@@ -18,6 +18,16 @@ if os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"):
 else:
     DB_PATH = DEFAULT_DB_PATH
 
+def ensure_tables_exist(conn):
+    try:
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users';")
+        if not cursor.fetchone():
+            print("[Database Notice] Tables missing, initializing database schema and seed data...")
+            init_db_schema_and_seed(conn)
+    except Exception as e:
+        print(f"[Database Error] Table verification error: {e}")
+
 def get_db():
     # If on Vercel and DB doesn't exist yet in /tmp, copy or initialize
     if (os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV")) and not os.path.exists(DB_PATH):
@@ -30,10 +40,10 @@ def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
+    ensure_tables_exist(conn)
     return conn
 
-def init_db():
-    conn = get_db()
+def init_db_schema_and_seed(conn):
     cursor = conn.cursor()
 
     # Users Table
@@ -130,6 +140,9 @@ def init_db():
 
     conn.commit()
     seed_data(conn)
+
+def init_db():
+    conn = get_db()
     conn.close()
 
 def log_event(level, message):

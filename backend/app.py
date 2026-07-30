@@ -220,6 +220,14 @@ def serve_spa(path):
         # Otherwise serve index.html (fallback router handles the hashing)
         return send_from_directory(app.static_folder, "index.html")
 
+@app.errorhandler(500)
+def handle_500(err):
+    return jsonify({"error": f"Internal Server Error: {str(err)}"}), 500
+
+@app.errorhandler(Exception)
+def handle_exception(err):
+    return jsonify({"error": f"Application Error: {str(err)}"}), 500
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     # Run server on all interfaces (localhost & local network IP)
