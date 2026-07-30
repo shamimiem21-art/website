@@ -231,6 +231,8 @@ def delete_reminder(reminder_id):
 def serve_spa(path):
     if request.method == "OPTIONS":
         return "", 200
+    if path.startswith("api/") or path.startswith("api"):
+        return jsonify({"error": "API endpoint not found"}), 404
     # Check if path looks like a static asset, serve it
     if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
         return send_from_directory(app.static_folder, path)
