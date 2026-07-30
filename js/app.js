@@ -134,6 +134,9 @@ function quickAdminLogin() {
     enterApp();
 }
 
+window.quickDemoLogin = quickDemoLogin;
+window.quickAdminLogin = quickAdminLogin;
+
 // Navigation & Auth Flow
 function switchAuthPane(paneName) {
     document.querySelectorAll('.auth-pane').forEach(p => p.classList.add('hidden'));
@@ -748,9 +751,13 @@ document.addEventListener('DOMContentLoaded', () => {
     bindEvent('goto-user-login', 'click', (e) => { e.preventDefault(); switchAuthPane('login'); });
 
     // Auth Form Submit Handlers
+    bindEvent('demo-user-btn', 'click', quickDemoLogin);
+    bindEvent('demo-admin-btn', 'click', quickAdminLogin);
+
     bindEvent('login-form', 'submit', (e) => {
         e.preventDefault();
-        const email = document.getElementById('login-email').value;
+        const inputVal = document.getElementById('login-email').value.trim();
+        const email = inputVal || 'demo@habitflow.com';
         state.user = { id: 101, name: email.split('@')[0], email: email, role: 'user' };
         showToast('Login successful!', 'success');
         enterApp();
@@ -758,9 +765,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     bindEvent('register-form', 'submit', (e) => {
         e.preventDefault();
-        const name = document.getElementById('reg-name').value;
-        const email = document.getElementById('reg-email').value;
-        state.user = { id: 201, name: name, email: email, role: 'user' };
+        const nameVal = document.getElementById('reg-name').value.trim() || 'Explorer';
+        const emailVal = document.getElementById('reg-email').value.trim() || 'user@domain.com';
+        state.user = { id: 201, name: nameVal, email: emailVal, role: 'user' };
         showToast('Account created successfully!', 'success');
         enterApp();
     });

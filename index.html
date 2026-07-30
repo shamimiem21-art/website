@@ -35,17 +35,17 @@
                 <form id="login-form">
                     <div class="form-group">
                         <label for="login-email">Email Address</label>
-                        <input type="email" id="login-email" class="form-control" placeholder="demo@habitflow.com" required>
+                        <input type="email" id="login-email" class="form-control" placeholder="demo@habitflow.com">
                     </div>
                     <div class="form-group">
                         <div class="label-row">
                             <label for="login-password">Password</label>
                             <a href="#" id="goto-forgot-pw" class="form-link">Forgot Password?</a>
                         </div>
-                        <input type="password" id="login-password" class="form-control" placeholder="••••••••" required>
+                        <input type="password" id="login-password" class="form-control" placeholder="••••••••">
                     </div>
                     <button type="submit" class="btn btn-primary btn-block">Log In</button>
-                    <button type="button" class="btn btn-secondary btn-block" style="margin-top: 10px; background: rgba(76, 175, 80, 0.15); border: 1px solid var(--primary); color: var(--text);" onclick="quickDemoLogin()"><i class="fas fa-bolt"></i> One-Click Demo User Login</button>
+                    <button type="button" id="demo-user-btn" class="btn btn-secondary btn-block" style="margin-top: 10px; background: rgba(76, 175, 80, 0.15); border: 1px solid var(--primary); color: var(--text);" onclick="quickDemoLogin()"><i class="fas fa-bolt"></i> One-Click Demo User Login</button>
                 </form>
                 <div class="auth-footer">
                     <span>New here? <a href="#" id="goto-register" class="form-link">Create an account</a></span>
@@ -103,14 +103,14 @@
                 <form id="admin-login-form">
                     <div class="form-group">
                         <label for="admin-email">Admin Email</label>
-                        <input type="email" id="admin-email" class="form-control" placeholder="admin@habitflow.com" required>
+                        <input type="email" id="admin-email" class="form-control" placeholder="admin@habitflow.com">
                     </div>
                     <div class="form-group">
                         <label for="admin-password">Admin Password</label>
-                        <input type="password" id="admin-password" class="form-control" placeholder="••••••••" required>
+                        <input type="password" id="admin-password" class="form-control" placeholder="••••••••">
                     </div>
                     <button type="submit" class="btn btn-primary btn-block">Verify Security Access</button>
-                    <button type="button" class="btn btn-secondary btn-block" style="margin-top: 10px; background: rgba(76, 175, 80, 0.15); border: 1px solid var(--primary); color: var(--text);" onclick="quickAdminLogin()"><i class="fas fa-bolt"></i> One-Click Admin Login</button>
+                    <button type="button" id="demo-admin-btn" class="btn btn-secondary btn-block" style="margin-top: 10px; background: rgba(76, 175, 80, 0.15); border: 1px solid var(--primary); color: var(--text);" onclick="quickAdminLogin()"><i class="fas fa-bolt"></i> One-Click Admin Login</button>
                 </form>
                 <div class="auth-footer">
                     <a href="#" id="goto-user-login" class="form-link">Return to User Portal</a>
