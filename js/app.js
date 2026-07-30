@@ -35,7 +35,49 @@ const state = {
 };
 
 // Pre-seeded Demo Data Builder
+function saveStateToLocalStorage() {
+    try {
+        const payload = {
+            user: state.user,
+            theme: state.theme,
+            tasks: state.tasks,
+            completions: state.completions,
+            reminders: state.reminders,
+            categories: state.categories,
+            featureFlags: state.featureFlags
+        };
+        localStorage.setItem('habitflow_state', JSON.stringify(payload));
+    } catch (e) {
+        console.error('Error saving state:', e);
+    }
+}
+
+function loadStateFromLocalStorage() {
+    try {
+        const saved = localStorage.getItem('habitflow_state');
+        if (saved) {
+            const data = JSON.parse(saved);
+            if (data.user) state.user = data.user;
+            if (data.theme) state.theme = data.theme;
+            if (data.tasks && data.tasks.length > 0) state.tasks = data.tasks;
+            if (data.completions && Object.keys(data.completions).length > 0) state.completions = data.completions;
+            if (data.reminders) state.reminders = data.reminders;
+            if (data.categories) state.categories = data.categories;
+            if (data.featureFlags) state.featureFlags = data.featureFlags;
+            return true;
+        }
+    } catch (e) {
+        console.error('Error loading state:', e);
+    }
+    return false;
+}
+
 function seedInitialData() {
+    const hasLoaded = loadStateFromLocalStorage();
+    if (hasLoaded && state.tasks.length > 0) {
+        return; // Retain user's custom tasks and completions across refreshes
+    }
+
     const defaultTasks = [
         { id: 1, name: 'Morning Meditation (10 mins)', category: 'Mindfulness & Mental', color: '#8e24aa', icon: 'brain', priority: 'high', is_active: 1, is_archived: 0, order_idx: 1 },
         { id: 2, name: 'Drink 2.5 Liters of Water', category: 'Health & Fitness', color: '#4caf50', icon: 'tint', priority: 'high', is_active: 1, is_archived: 0, order_idx: 2 },
@@ -55,11 +97,12 @@ function seedInitialData() {
         const dateStr = formatDate(d);
 
         defaultTasks.forEach(t => {
-            // High completion rate for realism (80%)
             const isCompleted = Math.random() > 0.2 ? 1 : 0;
             state.completions[`${t.id}_${dateStr}`] = isCompleted;
         });
     }
+
+    saveStateToLocalStorage();
 }
 
 // Helper: Format Date YYYY-MM-DD
@@ -111,6 +154,7 @@ function switchAuthPane(paneName) {
 }
 
 function enterApp() {
+    saveStateToLocalStorage();
     document.getElementById('auth-container').classList.add('hidden');
     document.getElementById('app-container').classList.remove('hidden');
 
@@ -242,6 +286,7 @@ function renderDashboardTodayTasks() {
 function toggleTaskToday(taskId, isChecked) {
     const todayStr = formatDate(new Date());
     state.completions[`${taskId}_${todayStr}`] = isChecked ? 1 : 0;
+    saveStateToLocalStorage();
     showToast(isChecked ? 'Habit completed!' : 'Habit unchecked', isChecked ? 'success' : 'info');
     renderDashboard();
 }
@@ -371,6 +416,7 @@ function renderTracker() {
 
 function toggleTaskMatrix(taskId, dateStr, isChecked) {
     state.completions[`${taskId}_${dateStr}`] = isChecked ? 1 : 0;
+    saveStateToLocalStorage();
     renderTracker();
 }
 
@@ -389,6 +435,7 @@ function handleDrop(e, targetTaskId) {
     const targetIdx = state.tasks.findIndex(t => t.id === targetTaskId);
     const [moved] = state.tasks.splice(draggedIdx, 1);
     state.tasks.splice(targetIdx, 0, moved);
+    saveStateToLocalStorage();
     renderTracker();
     showToast('Task order updated!', 'info');
 }
@@ -647,6 +694,7 @@ function editTask(id) {
 function deleteTask(id) {
     if (confirm('Are you sure you want to delete this habit?')) {
         state.tasks = state.tasks.filter(t => t.id !== id);
+        saveStateToLocalStorage();
         renderTracker();
         showToast('Habit deleted', 'info');
     }
@@ -662,6 +710,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.documentElement.setAttribute('data-theme', state.theme);
         const icon = document.querySelector('#theme-toggle-btn i');
         if (icon) icon.className = state.theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+        saveStateToLocalStorage();
     });
 
     // Auth Navigation
@@ -706,6 +755,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Logout
     bindEvent('logout-btn', 'click', () => {
         state.user = null;
+        saveStateToLocalStorage();
         document.getElementById('app-container').classList.add('hidden');
         document.getElementById('auth-container').classList.remove('hidden');
         switchAuthPane('login');
@@ -755,6 +805,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('New habit created!', 'success');
         }
 
+        saveStateToLocalStorage();
         document.getElementById('task-modal').classList.add('hidden');
         renderTracker();
         renderDashboard();
@@ -768,6 +819,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('user-name-lbl').textContent = newName;
         document.getElementById('user-avatar-lbl').textContent = newName.charAt(0).toUpperCase();
         document.getElementById('profile-name-lbl').textContent = newName;
+        saveStateToLocalStorage();
         showToast('Profile updated!', 'success');
     });
 
@@ -780,6 +832,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (task && time) {
             state.reminders.push({ taskId: task.id, taskName: task.name, time });
+            saveStateToLocalStorage();
             renderRemindersList();
             showToast(`Reminder set for ${task.name} at ${time}`, 'success');
         }
@@ -793,6 +846,10 @@ document.addEventListener('DOMContentLoaded', () => {
     bindEvent('mobile-open-nav', 'click', () => document.querySelector('.app-wrapper').classList.add('mobile-open'));
     bindEvent('mobile-close-nav', 'click', () => document.querySelector('.app-wrapper').classList.remove('mobile-open'));
 
-    // Default to Login screen
-    switchAuthPane('login');
+    // Auto-login if session exists in localStorage
+    if (state.user) {
+        enterApp();
+    } else {
+        switchAuthPane('login');
+    }
 });
