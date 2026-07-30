@@ -122,18 +122,30 @@ function bindEvent(id, event, handler) {
 }
 
 // ONE-CLICK DEMO USER & ADMIN LOGINS
-function quickDemoLogin() {
-    state.user = { id: 101, name: 'Shamim Hossen (Demo User)', email: 'demo@habitflow.com', role: 'user' };
-    showToast('Logged in as Demo User!', 'success');
+function performLogin() {
+    const emailInput = document.getElementById('login-email');
+    const inputVal = emailInput ? emailInput.value.trim() : '';
+    const email = inputVal || 'demo@habitflow.com';
+    const name = email.split('@')[0] || 'Shamim Hossen';
+    state.user = { id: 101, name: name, email: email, role: 'user' };
+    showToast('Welcome back, ' + name + '!', 'success');
     enterApp();
 }
 
-function quickAdminLogin() {
-    state.user = { id: 1, name: 'System Administrator', email: 'admin@habitflow.com', role: 'admin' };
-    showToast('Logged in to Admin Terminal!', 'success');
+function performAdminLogin() {
+    const emailInput = document.getElementById('admin-email');
+    const inputVal = emailInput ? emailInput.value.trim() : '';
+    const email = inputVal || 'admin@habitflow.com';
+    state.user = { id: 1, name: 'System Administrator', email: email, role: 'admin' };
+    showToast('Admin verification successful!', 'success');
     enterApp();
 }
 
+function quickDemoLogin() { performLogin(); }
+function quickAdminLogin() { performAdminLogin(); }
+
+window.performLogin = performLogin;
+window.performAdminLogin = performAdminLogin;
 window.quickDemoLogin = quickDemoLogin;
 window.quickAdminLogin = quickAdminLogin;
 
@@ -771,16 +783,14 @@ document.addEventListener('DOMContentLoaded', () => {
     bindEvent('goto-user-login', 'click', (e) => { e.preventDefault(); switchAuthPane('login'); });
 
     // Auth Form Submit Handlers
-    bindEvent('demo-user-btn', 'click', quickDemoLogin);
-    bindEvent('demo-admin-btn', 'click', quickAdminLogin);
+    bindEvent('main-login-btn', 'click', performLogin);
+    bindEvent('demo-user-btn', 'click', performLogin);
+    bindEvent('main-admin-btn', 'click', performAdminLogin);
+    bindEvent('demo-admin-btn', 'click', performAdminLogin);
 
     bindEvent('login-form', 'submit', (e) => {
         e.preventDefault();
-        const inputVal = document.getElementById('login-email').value.trim();
-        const email = inputVal || 'demo@habitflow.com';
-        state.user = { id: 101, name: email.split('@')[0], email: email, role: 'user' };
-        showToast('Login successful!', 'success');
-        enterApp();
+        performLogin();
     });
 
     bindEvent('register-form', 'submit', (e) => {

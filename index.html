@@ -32,7 +32,7 @@
 
             <!-- USER LOGIN PANE -->
             <div id="auth-login-pane" class="auth-pane">
-                <form id="login-form">
+                <form id="login-form" onsubmit="event.preventDefault(); performLogin();">
                     <div class="form-group">
                         <label for="login-email">Email Address</label>
                         <input type="email" id="login-email" class="form-control" placeholder="demo@habitflow.com">
@@ -44,8 +44,8 @@
                         </div>
                         <input type="password" id="login-password" class="form-control" placeholder="••••••••">
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">Log In</button>
-                    <button type="button" id="demo-user-btn" class="btn btn-secondary btn-block" style="margin-top: 10px; background: rgba(76, 175, 80, 0.15); border: 1px solid var(--primary); color: var(--text);" onclick="quickDemoLogin()"><i class="fas fa-bolt"></i> One-Click Demo User Login</button>
+                    <button type="button" id="main-login-btn" class="btn btn-primary btn-block" onclick="performLogin()">Log In</button>
+                    <button type="button" id="demo-user-btn" class="btn btn-secondary btn-block" style="margin-top: 10px; background: rgba(76, 175, 80, 0.15); border: 1px solid var(--primary); color: var(--text);" onclick="performLogin()"><i class="fas fa-bolt"></i> One-Click Demo User Login</button>
                 </form>
                 <div class="auth-footer">
                     <span>New here? <a href="#" id="goto-register" class="form-link">Create an account</a></span>
@@ -100,7 +100,7 @@
             <!-- ADMIN LOGIN PANE -->
             <div id="auth-admin-pane" class="auth-pane hidden">
                 <div class="admin-badge"><i class="fas fa-shield-alt"></i> Admin Terminal</div>
-                <form id="admin-login-form">
+                <form id="admin-login-form" onsubmit="event.preventDefault(); performAdminLogin();">
                     <div class="form-group">
                         <label for="admin-email">Admin Email</label>
                         <input type="email" id="admin-email" class="form-control" placeholder="admin@habitflow.com">
@@ -109,8 +109,8 @@
                         <label for="admin-password">Admin Password</label>
                         <input type="password" id="admin-password" class="form-control" placeholder="••••••••">
                     </div>
-                    <button type="submit" class="btn btn-primary btn-block">Verify Security Access</button>
-                    <button type="button" id="demo-admin-btn" class="btn btn-secondary btn-block" style="margin-top: 10px; background: rgba(76, 175, 80, 0.15); border: 1px solid var(--primary); color: var(--text);" onclick="quickAdminLogin()"><i class="fas fa-bolt"></i> One-Click Admin Login</button>
+                    <button type="button" id="main-admin-btn" class="btn btn-primary btn-block" onclick="performAdminLogin()">Verify Security Access</button>
+                    <button type="button" id="demo-admin-btn" class="btn btn-secondary btn-block" style="margin-top: 10px; background: rgba(76, 175, 80, 0.15); border: 1px solid var(--primary); color: var(--text);" onclick="performAdminLogin()"><i class="fas fa-bolt"></i> One-Click Admin Login</button>
                 </form>
                 <div class="auth-footer">
                     <a href="#" id="goto-user-login" class="form-link">Return to User Portal</a>
