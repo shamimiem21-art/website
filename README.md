@@ -2,6 +2,8 @@
 
 > **HabitFlow** is a modern, nature-inspired, production-ready habit and daily task tracking web application. Built with modern UI aesthetics, dynamic single-page routing, rich analytical reports, automatic streak calculation, and an elevated Admin Management Terminal.
 
+🌐 **Live Web Application URL**: [https://8742c151d3eb8f5e-103-74-86-146.serveousercontent.com](https://8742c151d3eb8f5e-103-74-86-146.serveousercontent.com)
+
 ---
 
 ## 🌟 Key Features
@@ -78,13 +80,11 @@ habitflow/
 
 ---
 
-## 🚀 Getting Started Locally
+## 🚀 Live Access & Local Quickstart
 
-### Prerequisites
-- **Python 3.10+** installed on your system.
+- **Live Public URL**: [https://8742c151d3eb8f5e-103-74-86-146.serveousercontent.com](https://8742c151d3eb8f5e-103-74-86-146.serveousercontent.com)
 
-### Installation & Setup
-
+### Local Setup
 1. **Clone the Repository**:
    ```bash
    git clone https://github.com/shamimiem21-art/website.git
@@ -106,7 +106,7 @@ habitflow/
    python run.py
    ```
 
-5. **Access the Web App**:
+5. **Access Locally**:
    Open your browser and navigate to `http://127.0.0.1:5000`.
 
 ---
@@ -117,6 +117,7 @@ habitflow/
 | :--- | :--- | :--- | :--- |
 | **Demo User** | `demo@habitflow.com` | `demopassword` | Full User Dashboard & Habits |
 | **Administrator** | `admin@habitflow.com` | `adminpassword` | Elevated Admin Terminal |
+| **Personal Account** | `hossenshamim186@gmail.com` | `123456` | Personal User Account |
 
 *(Note: One-Click login buttons are also available on the login screen for instant demo access.)*
 
