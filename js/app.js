@@ -88,19 +88,7 @@ function seedInitialData() {
     ];
 
     state.tasks = defaultTasks;
-
-    // Seed 60 days of completions for analytics
-    const today = new Date();
-    for (let i = 0; i < 60; i++) {
-        const d = new Date(today);
-        d.setDate(today.getDate() - i);
-        const dateStr = formatDate(d);
-
-        defaultTasks.forEach(t => {
-            const isCompleted = Math.random() > 0.2 ? 1 : 0;
-            state.completions[`${t.id}_${dateStr}`] = isCompleted;
-        });
-    }
+    state.completions = {}; // Start clean with 0 tasks marked done
 
     saveStateToLocalStorage();
 }
@@ -224,19 +212,20 @@ function calculateMetrics() {
     let currentStreak = 0;
     let longestStreak = 0;
     let tempStreak = 0;
+    const activeTasks = state.tasks.filter(t => t.is_active && !t.is_archived);
 
-    // Check consecutive past 60 days
+    // Calculate streak from past 60 days
     for (let i = 0; i < 60; i++) {
         const d = new Date(today);
         d.setDate(today.getDate() - i);
         const dateStr = formatDate(d);
 
         let completedTodayCount = 0;
-        state.tasks.forEach(t => {
+        activeTasks.forEach(t => {
             if (state.completions[`${t.id}_${dateStr}`] === 1) completedTodayCount++;
         });
 
-        if (completedTodayCount >= Math.ceil(state.tasks.length / 2)) {
+        if (activeTasks.length > 0 && completedTodayCount >= Math.ceil(activeTasks.length / 2)) {
             tempStreak++;
             if (i === 0 || tempStreak === i + 1) currentStreak = tempStreak;
             if (tempStreak > longestStreak) longestStreak = tempStreak;
@@ -245,8 +234,32 @@ function calculateMetrics() {
         }
     }
 
-    const weeklyPct = 84;
-    const monthlyPct = 78;
+    // Dynamic Weekly % (Past 7 days)
+    let weeklyCompleted = 0;
+    let totalWeeklyPossible = activeTasks.length * 7;
+    for (let i = 0; i < 7; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        const dateStr = formatDate(d);
+        activeTasks.forEach(t => {
+            if (state.completions[`${t.id}_${dateStr}`] === 1) weeklyCompleted++;
+        });
+    }
+    const weeklyPct = totalWeeklyPossible > 0 ? Math.round((weeklyCompleted / totalWeeklyPossible) * 100) : 0;
+
+    // Dynamic Monthly % (Past 30 days)
+    let monthlyCompleted = 0;
+    let totalMonthlyPossible = activeTasks.length * 30;
+    for (let i = 0; i < 30; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
+        const dateStr = formatDate(d);
+        activeTasks.forEach(t => {
+            if (state.completions[`${t.id}_${dateStr}`] === 1) monthlyCompleted++;
+        });
+    }
+    const monthlyPct = totalMonthlyPossible > 0 ? Math.round((monthlyCompleted / totalMonthlyPossible) * 100) : 0;
+
     const score = Math.round((currentStreak * 10) + (weeklyPct * 5));
 
     return { score, currentStreak, longestStreak, weeklyPct, monthlyPct };
