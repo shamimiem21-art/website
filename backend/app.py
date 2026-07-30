@@ -25,68 +25,63 @@ app.register_blueprint(admin_bp, url_prefix="/api/admin")
 
 # Initialize Database on boot
 with app.app_context():
-    init_db()
-    log_event("info", "Application booted and database verified.")
+    try:
+        init_db()
+        log_event("info", "Application booted and database verified.")
+    except Exception as e:
+        print(f"Database init notice: {e}")
     
-    # Automated background weekly email reporter thread
-    import threading
-    import time
-    import datetime
-    from database import get_db
-    from email_service import send_email
-    
-    def background_weekly_reporter():
-        # Delay startup slightly to avoid initialization races
-        time.sleep(10)
-        while True:
-            try:
-                today = datetime.date.today()
-                # Run once a day checking if it's Sunday
-                # Sunday = 6 in python weekday
-                if today.weekday() == 6:
-                    conn = get_db()
-                    cursor = conn.cursor()
-                    cursor.execute("SELECT id, name, email FROM users WHERE role = 'user' AND is_active = 1 AND weekly_emails = 1;")
-                    users = [dict(row) for row in cursor.fetchall()]
-                    
-                    for u in users:
-                        user_id = u["id"]
-                        email = u["email"]
-                        name = u["name"]
+    # Automated background weekly email reporter thread (Only for non-serverless environments)
+    if not os.environ.get("VERCEL") and not os.environ.get("VERCEL_ENV"):
+        import threading
+        import time
+        import datetime
+        from database import get_db
+        from email_service import send_email
+        
+        def background_weekly_reporter():
+            time.sleep(10)
+            while True:
+                try:
+                    today = datetime.date.today()
+                    if today.weekday() == 6:
+                        conn = get_db()
+                        cursor = conn.cursor()
+                        cursor.execute("SELECT id, name, email FROM users WHERE role = 'user' AND is_active = 1 AND weekly_emails = 1;")
+                        users = [dict(row) for row in cursor.fetchall()]
                         
-                        # Check if already sent in last 6 days
-                        cursor.execute("""
-                            SELECT COUNT(*) FROM system_logs 
-                            WHERE level = 'info' AND message LIKE ? AND created_at > datetime('now', '-6 days');
-                        """, (f"Weekly report email sent to: {email}%",))
-                        already_sent = cursor.fetchone()[0]
-                        
-                        if already_sent == 0:
-                            # We import inside to avoid circular dependencies
-                            from reports import generate_weekly_report_data
+                        for u in users:
+                            user_id = u["id"]
+                            email = u["email"]
+                            name = u["name"]
                             
-                            report_data = generate_weekly_report_data(user_id)
-                            suggestions_html = "".join([f"<li style='margin-bottom: 8px; color: #333;'>{s}</li>" for s in report_data["suggestions"]])
-                            report_html = f"""
-                            <div style="background-color: #f4f8f4; border: 1px solid #d8ebd4; padding: 20px; border-radius: 8px; margin: 15px 0;">
-                                <h3>Weekly Summary</h3>
-                                <p>Completion Rate: {report_data["weekly_pct"]}%</p>
-                                <ul>{suggestions_html}</ul>
-                            </div>
-                            """
-                            success = send_email(email, "Weekly Summary - HabitFlow 🌿", report_html, "weekly")
-                            if success:
-                                cursor.execute("INSERT INTO system_logs (level, message) VALUES ('info', ?);", (f"Weekly report email sent to: {email}",))
-                                conn.commit()
-                    conn.close()
-            except Exception as e:
-                print(f"[Weekly Reporter Error] {e}")
-            
-            # Check every 12 hours
-            time.sleep(43200)
+                            cursor.execute("""
+                                SELECT COUNT(*) FROM system_logs 
+                                WHERE level = 'info' AND message LIKE ? AND created_at > datetime('now', '-6 days');
+                            """, (f"Weekly report email sent to: {email}%",))
+                            already_sent = cursor.fetchone()[0]
+                            
+                            if already_sent == 0:
+                                from reports import generate_weekly_report_data
+                                report_data = generate_weekly_report_data(user_id)
+                                suggestions_html = "".join([f"<li style='margin-bottom: 8px; color: #333;'>{s}</li>" for s in report_data["suggestions"]])
+                                report_html = f"""
+                                <div style="background-color: #f4f8f4; border: 1px solid #d8ebd4; padding: 20px; border-radius: 8px; margin: 15px 0;">
+                                    <h3>Weekly Summary</h3>
+                                    <p>Completion Rate: {report_data["weekly_pct"]}%</p>
+                                    <ul>{suggestions_html}</ul>
+                                </div>
+                                """
+                                success = send_email(email, "Weekly Summary - HabitFlow 🌿", report_html, "weekly")
+                                if success:
+                                    cursor.execute("INSERT INTO system_logs (level, message) VALUES ('info', ?);", (f"Weekly report email sent to: {email}",))
+                                    conn.commit()
+                        conn.close()
+                except Exception as e:
+                    print(f"[Weekly Reporter Error] {e}")
+                time.sleep(43200)
 
-    # Start reporter thread
-    threading.Thread(target=background_weekly_reporter, daemon=True).start()
+        threading.Thread(target=background_weekly_reporter, daemon=True).start()
 
 # User profile update endpoint
 @app.route("/api/user/profile", methods=["PUT"])
