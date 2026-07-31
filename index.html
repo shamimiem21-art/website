@@ -22,101 +22,40 @@
     <div id="toast-container" class="toast-container"></div>
 
     <!-- AUTHENTICATION CONTAINER -->
-    <div id="auth-container" class="auth-wrapper">
-        <div class="auth-card glass-card">
-            <div class="auth-header">
-                <div class="brand-logo">
-                    <i class="fas fa-leaf"></i>
-                    <h2>HabitFlow</h2>
+    <div id="auth-container" class="auth-wrapper" style="display: flex !important; min-height: 100vh; align-items: center; justify-content: center;">
+        <div class="auth-card glass-card" style="width: 100%; max-width: 420px; padding: 32px; background: rgba(255, 255, 255, 0.95); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+            <div class="auth-header" style="text-align: center; margin-bottom: 24px;">
+                <div class="brand-logo" style="font-size: 28px; font-weight: 700; color: #2e7d32; margin-bottom: 8px;">
+                    <i class="fas fa-leaf"></i> HabitFlow
                 </div>
-                <p id="auth-subtitle" class="auth-subtitle">Welcome back. Keep flowing.</p>
+                <p id="auth-subtitle" style="color: #666; font-size: 14px;">Your Nature-Inspired Daily Habit & Growth Tracker</p>
             </div>
 
-            <!-- USER LOGIN PANE -->
-            <div id="auth-login-pane" class="auth-pane">
-                <form id="login-form" onsubmit="event.preventDefault(); performLogin();">
-                    <div class="form-group">
-                        <label for="login-email">Email Address</label>
-                        <input type="email" id="login-email" class="form-control" placeholder="demo@habitflow.com">
-                    </div>
-                    <div class="form-group">
-                        <div class="label-row">
-                            <label for="login-password">Password</label>
-                            <a href="#" id="goto-forgot-pw" class="form-link">Forgot Password?</a>
-                        </div>
-                        <input type="password" id="login-password" class="form-control" placeholder="••••••••">
-                    </div>
-                    <button type="button" id="main-login-btn" class="btn btn-primary btn-block" onclick="performLogin()">Log In</button>
-                    <button type="button" id="demo-user-btn" class="btn btn-secondary btn-block" style="margin-top: 10px; background: rgba(76, 175, 80, 0.15); border: 1px solid var(--primary); color: var(--text);" onclick="performLogin()"><i class="fas fa-bolt"></i> One-Click Demo User Login</button>
-                </form>
-                <div class="auth-footer">
-                    <span>New here? <a href="#" id="goto-register" class="form-link">Create an account</a></span>
-                    <div class="admin-login-divider">
-                        <span>or</span>
-                    </div>
-                    <a href="#" id="goto-admin-login" class="form-link text-center block"><i class="fas fa-shield-alt"></i> Access Admin Terminal</a>
+            <!-- UNIFIED LOGIN FORM -->
+            <form id="login-form" onsubmit="event.preventDefault(); doLogin('user');">
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="login-email" style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px;">Email Address</label>
+                    <input type="email" id="login-email" class="form-control" placeholder="demo@habitflow.com" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px;">
                 </div>
-            </div>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="login-password" style="display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px;">Password</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="••••••••" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px;">
+                </div>
 
-            <!-- REGISTER PANE -->
-            <div id="auth-register-pane" class="auth-pane hidden">
-                <form id="register-form">
-                    <div class="form-group">
-                        <label for="reg-name">Full Name</label>
-                        <input type="text" id="reg-name" class="form-control" placeholder="Shamim Hossen" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-email">Email Address</label>
-                        <input type="email" id="reg-email" class="form-control" placeholder="name@domain.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-password">Password (min 6 characters)</label>
-                        <input type="password" id="reg-password" class="form-control" placeholder="••••••••" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Create Account</button>
-                </form>
-                <div class="auth-footer">
-                    <span>Already have an account? <a href="#" id="goto-login" class="form-link">Log in</a></span>
-                </div>
-            </div>
+                <button type="button" id="login-btn-primary" class="btn btn-primary btn-block" onclick="doLogin('user')" style="width: 100%; padding: 14px; background: #2e7d32; color: #fff; border: none; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; margin-bottom: 12px;">
+                    <i class="fas fa-sign-in-alt"></i> Log In to Dashboard
+                </button>
 
-            <!-- FORGOT PASSWORD PANE -->
-            <div id="auth-forgot-pane" class="auth-pane hidden">
-                <p class="verify-helper">Enter your email and set your new password:</p>
-                <form id="forgot-form">
-                    <div class="form-group">
-                        <label for="forgot-email">Email Address</label>
-                        <input type="email" id="forgot-email" class="form-control" placeholder="name@domain.com" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="forgot-new-pw">New Password</label>
-                        <input type="password" id="forgot-new-pw" class="form-control" placeholder="••••••••" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-block">Reset Password</button>
-                </form>
-                <div class="auth-footer">
-                    <a href="#" id="forgot-cancel" class="form-link">Back to Login</a>
-                </div>
-            </div>
+                <button type="button" id="login-btn-demo" class="btn btn-secondary btn-block" onclick="doLogin('user')" style="width: 100%; padding: 12px; background: rgba(76, 175, 80, 0.15); color: #2e7d32; border: 1px solid #2e7d32; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; margin-bottom: 12px;">
+                    <i class="fas fa-bolt"></i> One-Click Demo User Login
+                </button>
 
-            <!-- ADMIN LOGIN PANE -->
-            <div id="auth-admin-pane" class="auth-pane hidden">
-                <div class="admin-badge"><i class="fas fa-shield-alt"></i> Admin Terminal</div>
-                <form id="admin-login-form" onsubmit="event.preventDefault(); performAdminLogin();">
-                    <div class="form-group">
-                        <label for="admin-email">Admin Email</label>
-                        <input type="email" id="admin-email" class="form-control" placeholder="admin@habitflow.com">
-                    </div>
-                    <div class="form-group">
-                        <label for="admin-password">Admin Password</label>
-                        <input type="password" id="admin-password" class="form-control" placeholder="••••••••">
-                    </div>
-                    <button type="button" id="main-admin-btn" class="btn btn-primary btn-block" onclick="performAdminLogin()">Verify Security Access</button>
-                    <button type="button" id="demo-admin-btn" class="btn btn-secondary btn-block" style="margin-top: 10px; background: rgba(76, 175, 80, 0.15); border: 1px solid var(--primary); color: var(--text);" onclick="performAdminLogin()"><i class="fas fa-bolt"></i> One-Click Admin Login</button>
-                </form>
-                <div class="auth-footer">
-                    <a href="#" id="goto-user-login" class="form-link">Return to User Portal</a>
-                </div>
+                <button type="button" id="login-btn-admin" class="btn btn-secondary btn-block" onclick="doLogin('admin')" style="width: 100%; padding: 12px; background: rgba(33, 150, 243, 0.1); color: #1976d2; border: 1px solid #1976d2; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer;">
+                    <i class="fas fa-shield-alt"></i> One-Click Admin Terminal Login
+                </button>
+            </form>
+            <div style="text-align: center; margin-top: 20px; font-size: 13px; color: #888;">
+                🌱 Ready to build positive habits daily. Zero setup required.
             </div>
         </div>
     </div>

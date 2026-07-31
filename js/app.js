@@ -126,37 +126,58 @@ function setText(id, text) {
     if (el) el.textContent = text;
 }
 
-// ONE-CLICK DEMO USER & ADMIN LOGINS
-function performLogin() {
+// UNIFIED RECODED AUTHENTICATION ENGINE
+function doLogin(role = 'user') {
     try {
         const emailInput = document.getElementById('login-email');
-        const inputVal = emailInput ? emailInput.value.trim() : '';
-        const email = inputVal || 'demo@habitflow.com';
-        const name = email.split('@')[0] || 'Shamim Hossen';
-        state.user = { id: 101, name: name, email: email, role: 'user' };
-        showToast('Welcome back, ' + name + '!', 'success');
-        enterApp();
+        const userEmail = (emailInput && emailInput.value.trim()) ? emailInput.value.trim() : (role === 'admin' ? 'admin@habitflow.com' : 'demo@habitflow.com');
+        const userName = role === 'admin' ? 'System Administrator' : (userEmail.split('@')[0] || 'Shamim Hossen');
+
+        state.user = {
+            id: role === 'admin' ? 1 : 101,
+            name: userName,
+            email: userEmail,
+            role: role
+        };
+
+        saveStateToLocalStorage();
+
+        const authEl = document.getElementById('auth-container');
+        const appEl = document.getElementById('app-container');
+
+        if (authEl) {
+            authEl.setAttribute('style', 'display: none !important; opacity: 0 !important; visibility: hidden !important;');
+        }
+        if (appEl) {
+            appEl.setAttribute('style', 'display: flex !important; opacity: 1 !important; visibility: visible !important;');
+        }
+
+        setText('user-name-lbl', userName);
+        setText('user-role-lbl', role === 'admin' ? 'Administrator' : 'Explorer');
+        setText('user-avatar-lbl', userName.charAt(0).toUpperCase());
+
+        const adminNav = document.getElementById('nav-admin');
+        if (adminNav) {
+            if (role === 'admin') adminNav.classList.remove('hidden');
+            else adminNav.classList.add('hidden');
+        }
+
+        window.location.hash = '#dashboard';
+        try { handleRouting(); } catch (err) {}
+        showToast(`Welcome back, ${userName}! 🌿`, 'success');
     } catch (e) {
         console.error('Login error:', e);
+        if (document.getElementById('auth-container')) document.getElementById('auth-container').style.display = 'none';
+        if (document.getElementById('app-container')) document.getElementById('app-container').style.display = 'flex';
     }
 }
 
-function performAdminLogin() {
-    try {
-        const emailInput = document.getElementById('admin-email');
-        const inputVal = emailInput ? emailInput.value.trim() : '';
-        const email = inputVal || 'admin@habitflow.com';
-        state.user = { id: 1, name: 'System Administrator', email: email, role: 'admin' };
-        showToast('Admin verification successful!', 'success');
-        enterApp();
-    } catch (e) {
-        console.error('Admin login error:', e);
-    }
-}
+function performLogin() { doLogin('user'); }
+function performAdminLogin() { doLogin('admin'); }
+function quickDemoLogin() { doLogin('user'); }
+function quickAdminLogin() { doLogin('admin'); }
 
-function quickDemoLogin() { performLogin(); }
-function quickAdminLogin() { performAdminLogin(); }
-
+window.doLogin = doLogin;
 window.performLogin = performLogin;
 window.performAdminLogin = performAdminLogin;
 window.quickDemoLogin = quickDemoLogin;
