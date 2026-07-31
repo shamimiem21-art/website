@@ -791,6 +791,53 @@ function deleteTask(id) {
 }
 
 // INITIALIZATION & EVENT LISTENERS
+document.addEventListener('click', (e) => {
+    const clickable = e.target.closest('button, a, .nav-item');
+    if (!clickable) return;
+
+    const id = clickable.id;
+    const view = clickable.getAttribute('data-view');
+
+    if (id === 'main-login-btn' || id === 'demo-user-btn') {
+        e.preventDefault();
+        performLogin();
+    } else if (id === 'main-admin-btn' || id === 'demo-admin-btn') {
+        e.preventDefault();
+        performAdminLogin();
+    } else if (id === 'goto-register') {
+        e.preventDefault();
+        switchAuthPane('register');
+    } else if (id === 'goto-login' || id === 'goto-user-login' || id === 'forgot-cancel') {
+        e.preventDefault();
+        switchAuthPane('login');
+    } else if (id === 'goto-forgot-pw') {
+        e.preventDefault();
+        switchAuthPane('forgot');
+    } else if (id === 'goto-admin-login') {
+        e.preventDefault();
+        switchAuthPane('admin');
+    } else if (id === 'logout-btn') {
+        e.preventDefault();
+        state.user = null;
+        saveStateToLocalStorage();
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app-container');
+        if (appContainer) {
+            appContainer.classList.add('hidden');
+            appContainer.style.setProperty('display', 'none', 'important');
+        }
+        if (authContainer) {
+            authContainer.classList.remove('hidden');
+            authContainer.style.setProperty('display', 'flex', 'important');
+        }
+        switchAuthPane('login');
+        showToast('Logged out', 'info');
+    } else if (view) {
+        window.location.hash = '#' + view;
+        handleRouting();
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     seedInitialData();
 
