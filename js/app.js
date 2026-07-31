@@ -1016,22 +1016,28 @@ document.addEventListener('DOMContentLoaded', () => {
     bindEvent('mobile-open-nav', 'click', () => document.querySelector('.app-wrapper').classList.add('mobile-open'));
     bindEvent('mobile-close-nav', 'click', () => document.querySelector('.app-wrapper').classList.remove('mobile-open'));
 
-    // Auto-login if session exists in localStorage
-    if (state.user) {
-        enterApp();
-    } else {
-        const authContainer = document.getElementById('auth-container');
-        const appContainer = document.getElementById('app-container');
+function initApp() {
+    try {
+        seedInitialData();
 
-        if (appContainer) {
-            appContainer.classList.add('hidden');
-            appContainer.style.setProperty('display', 'none', 'important');
-        }
-        if (authContainer) {
-            authContainer.classList.remove('hidden');
-            authContainer.style.setProperty('display', 'flex', 'important');
-        }
+        if (state.user) {
+            doLogin(state.user.role || 'user');
+        } else {
+            const authContainer = document.getElementById('auth-container');
+            const appContainer = document.getElementById('app-container');
 
-        switchAuthPane('login');
+            if (appContainer) appContainer.setAttribute('style', 'display: none !important;');
+            if (authContainer) authContainer.setAttribute('style', 'display: flex !important;');
+        }
+    } catch (e) {
+        console.error('Init error:', e);
     }
-});
+}
+
+// 3-WAY FAILSAFE INITIALIZER
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    initApp();
+} else {
+    document.addEventListener('DOMContentLoaded', initApp);
+}
+window.initApp = initApp;
